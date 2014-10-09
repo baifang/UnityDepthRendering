@@ -14,6 +14,8 @@ public class DepthCompositor : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        _refCamera = (Camera)GetComponent("Camera");
+
         _maskDepthRenderGameObject = new GameObject("$MaskDepthRender");
         _maskDepthRenderCamera = (Camera)_maskDepthRenderGameObject.AddComponent("Camera");
         _maskDepthRenderCamera.enabled = false;
@@ -53,11 +55,18 @@ public class DepthCompositor : MonoBehaviour {
             //RenderTexture rt = _maskDepthRenderCamera.targetTexture;
             _sceneDepthRenderTexture = CreateScreenRenderTexture("scene");
             //Object.Destroy(rt);
+
+            _finalRenderTexture = CreateScreenRenderTexture("composited");
+        }
+
+        if (_refCamera != null && _finalRenderTexture != null)
+        {
+            _refCamera.targetTexture = _finalRenderTexture;
         }
 
         if (_maskDepthRenderCamera != null && _maskDepthRenderTexture !=null)
         {
-            _maskDepthRenderCamera.CopyFrom(Camera.main);
+            _maskDepthRenderCamera.CopyFrom(_refCamera);
             _maskDepthRenderCamera.cullingMask = 1 << MaskLayer;
             _maskDepthRenderCamera.targetTexture = _maskDepthRenderTexture;
             _maskDepthRenderCamera.clearFlags = CameraClearFlags.Color;
@@ -67,7 +76,7 @@ public class DepthCompositor : MonoBehaviour {
 
         if (_sceneDepthRenderCamera != null && _sceneDepthRenderTexture != null)
         {
-            _sceneDepthRenderCamera.CopyFrom(Camera.main);
+            _sceneDepthRenderCamera.CopyFrom(_refCamera);
             _sceneDepthRenderCamera.cullingMask = _sceneDepthRenderCamera.cullingMask & ~(1 << MaskLayer);
             _sceneDepthRenderCamera.targetTexture = _sceneDepthRenderTexture;
             _sceneDepthRenderCamera.clearFlags = CameraClearFlags.Color;
@@ -99,12 +108,17 @@ public class DepthCompositor : MonoBehaviour {
         rt.name = "$" + name + "@" + Screen.width + "x" + Screen.height;
         return rt;
     }
+
+    private Camera _refCamera;
+
     private Camera _maskDepthRenderCamera;
     private Camera _sceneDepthRenderCamera;
     private GameObject _maskDepthRenderGameObject;
     private GameObject _sceneDepthRenderGameObject;
     private RenderTexture _maskDepthRenderTexture;
     private RenderTexture _sceneDepthRenderTexture;
+
+    private RenderTexture _finalRenderTexture;
 
     private Material _depthCompositorMaterial;
 
