@@ -23,6 +23,7 @@ v2f vert (appdata_base v) {
     v2f o;
     o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
 	o.depth.x = COMPUTE_DEPTH_01;
+	o.depth.x = -mul (UNITY_MATRIX_MV, v.vertex).z;
     return o;
 }
 
